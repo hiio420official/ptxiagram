@@ -1,8 +1,8 @@
 # ptxiagram
 
-**Generate architecture and workflow diagrams as native, editable PowerPoint shapes — not an embedded image.**
+**Generate architecture, workflow, and sequence diagrams as native, editable PowerPoint shapes — not an embedded image.**
 
-> Built with [Claude Code](https://claude.com/claude-code) — from the initial prototype through the pptxgenjs/Hancom Office compatibility investigation, the JSON schema design, the layout validator, and this package's release automation. See the [commit history](https://github.com/hiio420official/ptxiagram/commits/main) for the build process.
+> Built with [Claude Code](https://claude.com/claude-code) (Claude Sonnet 5) — from the initial prototype through the pptxgenjs/Hancom Office compatibility investigation, the JSON schema design, the layout validator, and this package's release automation. See the [commit history](https://github.com/hiio420official/ptxiagram/commits/main) for the build process.
 
 ptxiagram is an agent skill for Claude (and a standalone CLI/library) that turns a plain-English description of a system or process into a `.pptx` slide built from real PowerPoint shapes: rectangles, cylinders, clouds, connectors, text boxes. Anyone can open the result in PowerPoint — or Hancom 한쇼 — and click a box to change its color, text, or position, because it *is* a box, not a picture of one.
 
@@ -32,6 +32,11 @@ Use ptxiagram to make a workflow diagram of our incident response process,
 with a lane per team, so I can paste it into the postmortem deck.
 ```
 
+```text
+Use ptxiagram to draw a sequence diagram of this API's cache-fallback path,
+from request to response, for the engineering review deck.
+```
+
 The agent reads `SKILL.md`, writes a small JSON file describing your nodes and
 edges, and runs the CLI to produce a `.pptx` with real, editable shapes.
 
@@ -58,7 +63,7 @@ await renderWorkflow("my-diagram.workflow.json", "out.pptx");
 
 `render` validates the input (schema + layout) before writing anything, and always repairs the output for Hancom Office compatibility. `check` confirms the repair took, dumps every embedded text run for a spelling/content spot-check, and — if LibreOffice is installed — writes a PNG preview for a quick visual check.
 
-See [`ptxiagram/SKILL.md`](ptxiagram/SKILL.md) for the full JSON shape of both diagram types, the node-type → shape/color mapping, and the route presets.
+See [`ptxiagram/SKILL.md`](ptxiagram/SKILL.md) for the full JSON shape of all three diagram types, the node-type → shape/color mapping, and the route presets.
 
 ## Why every file gets repaired
 
