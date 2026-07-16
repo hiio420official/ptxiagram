@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "신규 직원 온보딩 프로세스",
+    "subtitle": "HR팀 → IT팀 → 팀장",
+    "output": "test/output/onboarding.schema-driven.pptx"
+  },
+  "lanes": [
+    { "id": "hr", "label": "HR팀" },
+    { "id": "it", "label": "IT팀" },
+    { "id": "lead", "label": "팀장" }
+  ],
+  "nodes": [
+    { "id": "apply", "lane": "hr", "col": 0, "type": "neutral", "label": "입사 서류 접수", "sublabel": "인사팀 접수 확인" },
+    { "id": "request", "lane": "hr", "col": 1, "type": "neutral", "label": "계정 발급 요청", "sublabel": "IT팀에 요청 전달" },
+    { "id": "account", "lane": "it", "col": 1, "type": "backend", "label": "계정 생성", "sublabel": "사내 계정 · 이메일" },
+    { "id": "equipment", "lane": "it", "col": 2, "type": "backend", "label": "장비 지급", "sublabel": "노트북 · 출입카드" },
+    { "id": "kickoff", "lane": "lead", "col": 3, "type": "database", "label": "킥오프 미팅", "sublabel": "팀 소개 · 업무 안내" },
+    { "id": "done", "lane": "lead", "col": 4, "type": "database", "label": "온보딩 완료", "sublabel": "1주차 체크인 예약" }
+  ],
+  "edges": [
+    { "from": "apply", "to": "request", "variant": "default", "route": "straight" },
+    { "from": "request", "to": "account", "variant": "emphasis", "route": "drop", "label": "요청 전달" },
+    { "from": "account", "to": "equipment", "variant": "emphasis", "route": "straight" },
+    { "from": "equipment", "to": "kickoff", "variant": "default", "route": "drop", "label": "장비 수령 후" },
+    { "from": "kickoff", "to": "done", "variant": "default", "route": "straight" }
+  ]
+}
