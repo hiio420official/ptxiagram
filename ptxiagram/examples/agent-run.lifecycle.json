@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "에이전트 실행 라이프사이클",
+    "subtitle": "상태와 종료 결과",
+    "output": "test/output/agent-run.schema-driven.pptx"
+  },
+  "lanes": [
+    { "id": "main", "label": "실행 단계" },
+    { "id": "terminal", "label": "종료 결과" }
+  ],
+  "nodes": [
+    { "id": "queued", "lane": "main", "col": 0, "type": "neutral", "label": "대기 중", "sublabel": "큐에 등록됨" },
+    { "id": "running", "lane": "main", "col": 1, "type": "active", "label": "실행 중", "sublabel": "작업 처리" },
+    { "id": "reviewing", "lane": "main", "col": 3, "type": "waiting", "label": "승인 대기", "sublabel": "휴먼 리뷰" },
+    { "id": "completed", "lane": "terminal", "col": 3, "type": "success", "label": "완료" },
+    { "id": "failed", "lane": "terminal", "col": 5, "type": "failure", "label": "실패", "sublabel": "재시도 필요" }
+  ],
+  "edges": [
+    { "from": "queued", "to": "running", "variant": "default", "route": "straight" },
+    { "from": "running", "to": "reviewing", "variant": "default", "route": "straight" },
+    { "from": "reviewing", "to": "completed", "variant": "emphasis", "route": "drop", "label": "승인" },
+    { "from": "reviewing", "to": "failed", "variant": "security", "route": "drop", "label": "반려" }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "제품 분석 데이터 파이프라인",
+    "subtitle": "이벤트 수집 → 적재 → 소비",
+    "output": "test/output/product-analytics.schema-driven.pptx"
+  },
+  "stages": [
+    { "label": "Sources" },
+    { "label": "Ingest" },
+    { "label": "Store" },
+    { "label": "Consumers" }
+  ],
+  "nodes": [
+    { "id": "web", "type": "frontend", "label": "웹 앱", "sublabel": "clickstream", "stage": 0, "row": 0 },
+    { "id": "mobile", "type": "frontend", "label": "모바일 앱", "sublabel": "clickstream", "stage": 0, "row": 1 },
+    { "id": "queue", "type": "queue", "label": "이벤트 큐", "sublabel": "Kafka", "stage": 1, "row": 0 },
+    { "id": "warehouse", "type": "database", "label": "데이터 웨어하우스", "sublabel": "BigQuery", "stage": 2, "row": 0 },
+    { "id": "dashboard", "type": "external", "label": "대시보드", "sublabel": "내부 분석팀", "stage": 3, "row": 0 },
+    { "id": "ml", "type": "external", "label": "추천 모델", "sublabel": "배치 학습", "stage": 3, "row": 1 }
+  ],
+  "flows": [
+    { "from": "web", "to": "queue", "label": "이벤트 전송", "classification": "PII touch", "variant": "security" },
+    { "from": "mobile", "to": "queue", "label": "이벤트 전송", "classification": "PII touch", "variant": "security" },
+    { "from": "queue", "to": "warehouse", "label": "적재", "classification": "approved only", "variant": "default" },
+    { "from": "warehouse", "to": "dashboard", "label": "집계 쿼리", "classification": "non-PII", "variant": "default" },
+    { "from": "warehouse", "to": "ml", "label": "피처 추출", "classification": "non-PII", "variant": "dashed" }
+  ]
+}

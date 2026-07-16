@@ -7,7 +7,7 @@
 ptxiagram is an agent skill for Claude (and a standalone CLI/library) that turns a plain-English description of a system or process into a `.pptx` slide built from real PowerPoint shapes: rectangles, cylinders, clouds, connectors, text boxes. Anyone can open the result in PowerPoint — or Hancom 한쇼 — and click a box to change its color, text, or position, because it *is* a box, not a picture of one.
 
 - **Native shapes, not a picture** — every box and arrow is a real PPTX shape, editable after generation
-- **Three diagram types today** — `workflow` (swimlanes, happy-path flows), `architecture` (free-placed components, trust boundaries, hub-and-spoke), and `sequence` (participants + lifelines, API call chains)
+- **Five diagram types today** — `workflow` (swimlanes, happy-path flows), `architecture` (free-placed components, trust boundaries, hub-and-spoke), `sequence` (participants + lifelines, API call chains), `dataflow` (stage-to-stage pipelines with PII/lineage annotations), and `lifecycle` (state machines with terminal outcomes)
 - **A validator that catches real layout bugs before rendering** — node overlap, labels wider than their shape, and connectors that cut through an unrelated node all fail loudly with a specific fix, instead of shipping a broken-looking slide
 - **Ships a Hancom Office compatibility fix** — every generated file is post-processed to strip a documented PptxGenJS defect that PowerPoint silently repairs but Hancom's 한쇼 flags as a corrupted document (see below)
 - **Route presets instead of hand-computed coordinates** — `straight`, `drop`, `elbow-right`, `arc-over-top` cover swimlane transitions, hub-and-spoke fan-out, and routing around a boundary box
@@ -63,7 +63,7 @@ await renderWorkflow("my-diagram.workflow.json", "out.pptx");
 
 `render` validates the input (schema + layout) before writing anything, and always repairs the output for Hancom Office compatibility. `check` confirms the repair took, dumps every embedded text run for a spelling/content spot-check, and — if LibreOffice is installed — writes a PNG preview for a quick visual check.
 
-See [`SKILL.md`](SKILL.md) for the full JSON shape of all three diagram types, the node-type → shape/color mapping, and the route presets.
+See [`SKILL.md`](SKILL.md) for the full JSON shape of all five diagram types, the node-type → shape/color mapping, and the route presets.
 
 ## Why every file gets repaired
 

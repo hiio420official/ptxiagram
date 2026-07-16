@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Ajv2020 from "ajv/dist/2020.js";
-import { computeWorkflowLayout, computeArchitectureLayout, computeSequenceLayout, SLIDE_W, SLIDE_H } from "./layout.mjs";
+import { computeWorkflowLayout, computeArchitectureLayout, computeSequenceLayout, computeDataflowLayout, sameRow, SLIDE_W, SLIDE_H } from "./layout.mjs";
 import { computeSegments } from "./routes.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -64,7 +64,7 @@ function offSlide(box) {
   return box.x < 0 || box.y < 0 || box.x + box.w > SLIDE_W || box.y + box.h > SLIDE_H;
 }
 
-function checkCommon({ problems, ids, boxes, labelOf, fontSizePt, edgesOrConns, resolveEndpoints, edgeLabel }) {
+function checkCommon({ problems, ids, boxes, labelOf, fontSizePt, edgesOrConns, resolveEndpoints, edgeLabel, resolveRoute = (e) => e.route || "straight" }) {
   for (const id of ids) {
     const box = boxes[id];
     const label = labelOf(id);
@@ -89,7 +89,7 @@ function checkCommon({ problems, ids, boxes, labelOf, fontSizePt, edgesOrConns, 
     const { from, to } = resolveEndpoints(e);
     if (!from || !to) continue; // unknown-id errors surface from the renderer/schema instead
     const { segments } = computeSegments(from, to, {
-      route: e.route || "straight", bias: e.bias, clearY: e.clearY, label: e.label,
+      route: resolveRoute(e, from, to), bias: e.bias, clearY: e.clearY, label: e.label,
     });
     for (const id of ids) {
       if (id === e.from || id === e.to) continue;
@@ -130,6 +130,22 @@ export function validateArchitectureLayout(raw) {
     edgesOrConns: raw.connections,
     resolveEndpoints: (e) => ({ from: boxes[e.from], to: boxes[e.to] }),
     edgeLabel: (e) => `Connection "${e.from}"->"${e.to}"`,
+  });
+}
+
+export function validateDataflowLayout(raw) {
+  const { nodeBoxes } = computeDataflowLayout(raw);
+  const labelOf = (id) => raw.nodes.find((n) => n.id === id).label;
+  return checkCommon({
+    problems: [],
+    ids: Object.keys(nodeBoxes),
+    boxes: nodeBoxes,
+    labelOf,
+    fontSizePt: 12.5,
+    edgesOrConns: raw.flows,
+    resolveEndpoints: (f) => ({ from: nodeBoxes[f.from], to: nodeBoxes[f.to] }),
+    edgeLabel: (f) => `Flow "${f.from}"->"${f.to}"`,
+    resolveRoute: (f, from, to) => (from && to && sameRow(from, to) ? "straight" : "elbow-right"),
   });
 }
 
@@ -176,7 +192,9 @@ export function validateSequenceLayout(raw) {
 export async function validateAll(type, raw) {
   await validateSchema(type, raw);
   if (type === "workflow") return validateWorkflowLayout(raw);
+  if (type === "lifecycle") return validateWorkflowLayout(raw); // same JSON shape as workflow
   if (type === "architecture") return validateArchitectureLayout(raw);
   if (type === "sequence") return validateSequenceLayout(raw);
+  if (type === "dataflow") return validateDataflowLayout(raw);
   throw new Error(`Unknown diagram type: ${type}`);
 }

@@ -15,7 +15,7 @@
       "maxItems": 2
     },
     "nodeType": {
-      "enum": ["client", "frontend", "neutral", "backend", "database", "cache", "queue", "external", "security", "decision"]
+      "enum": ["client", "frontend", "neutral", "backend", "database", "cache", "queue", "external", "security", "decision", "active", "waiting", "success", "failure"]
     },
     "route": {
       "enum": ["straight", "drop", "elbow-right", "arc-over-top"]

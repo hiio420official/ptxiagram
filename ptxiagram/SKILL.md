@@ -1,9 +1,9 @@
 ---
 name: ptxiagram
-description: Create architecture, workflow, and sequence diagrams as native, editable PowerPoint shapes (real rectangles, connectors, and text boxes a user can click and restyle in PowerPoint or Hancom 한쇼) instead of an embedded image. Accepts a plain-language description, turns it into a small JSON file, and renders it with pptxgenjs. Use when the user asks for a diagram, architecture drawing, process flow, or API call sequence that needs to end up inside a .pptx deck or a Korean-office-suite-compatible presentation - not when they just want a standalone image or an HTML/web diagram (use an SVG-based diagram tool for that instead).
+description: Create architecture, workflow, sequence, dataflow, and lifecycle diagrams as native, editable PowerPoint shapes (real rectangles, connectors, and text boxes a user can click and restyle in PowerPoint or Hancom 한쇼) instead of an embedded image. Accepts a plain-language description, turns it into a small JSON file, and renders it with pptxgenjs. Use when the user asks for a diagram, architecture drawing, process flow, API call sequence, data pipeline, or state machine that needs to end up inside a .pptx deck or a Korean-office-suite-compatible presentation - not when they just want a standalone image or an HTML/web diagram (use an SVG-based diagram tool for that instead).
 license: MIT
 metadata:
-  version: "0.2.0"
+  version: "0.3.0"
   status: prototype
   based_on: "gitbrent/PptxGenJS (MIT)"
 ---
@@ -52,6 +52,8 @@ validation and the embedded-text dump, just no rendered preview image).
 | `workflow` | Cross-team processes, approval chains, anything with swimlanes and a happy path | `schemas/workflow.schema.json` |
 | `architecture` | System components, services, datastores, trust boundaries, hub-and-spoke integrations | `schemas/architecture.schema.json` |
 | `sequence` | API call chains, request/response traces, cache-fallback flows — up to 6 participants, up to 9 messages | `schemas/sequence.schema.json` |
+| `dataflow` | Data pipelines, ETL/ELT, PII/lineage annotations, stage-to-stage flows | `schemas/dataflow.schema.json` |
+| `lifecycle` | State machines, status transitions, terminal outcomes (same JSON shape as `workflow`) | `schemas/lifecycle.schema.json` |
 
 ## The loop
 
@@ -60,6 +62,8 @@ validation and the embedded-text dump, just no rendered preview image).
    - `examples/onboarding.workflow.json`
    - `examples/order-processing.architecture.json`
    - `examples/cache-miss.sequence.json`
+   - `examples/product-analytics.dataflow.json`
+   - `examples/agent-run.lifecycle.json`
 2. Write `<name>.<type>.json`.
 3. Render:
    ```bash
@@ -153,12 +157,59 @@ explicit `y` field. Up to 9 messages without `cards`, ~6 with (cards need
 room at the bottom, so the lifeline gets shorter). Self-messages (same
 `from`/`to`) aren't supported yet.
 
+## Dataflow JSON shape
+
+```json
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": { "title": "...", "output": "out.pptx" },
+  "stages": [{ "label": "Sources" }, { "label": "Ingest" }],
+  "nodes": [
+    { "id": "web", "type": "frontend", "label": "웹 앱", "stage": 0, "row": 0 }
+  ],
+  "flows": [
+    { "from": "web", "to": "queue", "label": "이벤트 전송", "classification": "PII touch", "variant": "security" }
+  ],
+  "cards": []
+}
+```
+
+**Layout budget**: up to 5 stages (columns, 2.6in apart) x 5 rows (fixed y
+positions). `flow.label` is required; `classification` is optional
+free-text rendered in parentheses after the label (e.g. "PII touch",
+"non-PII", "approved only") for sensitivity/lineage annotations. Route is
+picked automatically — `straight` when both ends share a row, `elbow-right`
+otherwise — so flows don't take a `route` field.
+
+## Lifecycle JSON shape
+
+Structurally identical to the workflow schema (same `lanes`/`nodes`/`edges`
+shape, same layout budget) — only `diagram_type` differs. Convention: a
+`main` lane for the happy-path states and a `terminal` lane for end states.
+
+```json
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": { "title": "...", "output": "out.pptx" },
+  "lanes": [{ "id": "main", "label": "실행 단계" }, { "id": "terminal", "label": "종료 결과" }],
+  "nodes": [
+    { "id": "queued", "lane": "main", "col": 0, "type": "neutral", "label": "대기 중" },
+    { "id": "completed", "lane": "terminal", "col": 3, "type": "success", "label": "완료" }
+  ],
+  "edges": [{ "from": "queued", "to": "completed", "variant": "emphasis", "route": "drop" }]
+}
+```
+
 ## Node types
 
 `client` `frontend` `neutral` `backend` `database` `cache` `queue`
-`external` `security` `decision` — each maps to a shape preset (ellipse,
-rect, roundRect, can/cylinder, hexagon, cube, cloud, diamond) and a color
-pair. Pick by role, not by desired color.
+`external` `security` `decision` `active` `waiting` `success` `failure` —
+each maps to a shape preset (ellipse, rect, roundRect, can/cylinder,
+hexagon, cube, cloud, diamond) and a color pair. The last four
+(`active`/`waiting`/`success`/`failure`) exist for `lifecycle` states;
+pick by role, not by desired color.
 
 ## Route presets
 
@@ -195,8 +246,11 @@ this automatically; `check` verifies it actually happened. Source:
 
 ## What's not built yet
 
-- `dataflow`, `lifecycle` diagram types (`workflow`, `architecture`, and
-  `sequence` exist so far)
 - No CJK exact-metrics font measurement — the label-width check is a
   conservative estimate, not real glyph widths
 - Sequence self-messages (a participant messaging itself)
+- No label-vs-label collision detection — two edges converging on the same
+  node from different rows can still end up with close (though no longer
+  overlapping, after the `elbow-right` label-anchor fix) labels in a busy
+  diagram; the validator catches label-vs-*shape* and edge-vs-*node*
+  collisions, not label-vs-label

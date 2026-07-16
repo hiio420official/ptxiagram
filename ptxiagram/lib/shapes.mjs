@@ -12,6 +12,11 @@ export const NODE_TYPES = {
   external: { shape: "cloud", fill: "FEF3C7", stroke: "F59E0B" },
   security: { shape: "roundRect", fill: "FFE4E6", stroke: "F43F5E" },
   decision: { shape: "diamond", fill: "FFE4E6", stroke: "F43F5E" },
+  // lifecycle-diagram states
+  active: { shape: "roundRect", fill: "DBEAFE", stroke: "3B82F6" },
+  waiting: { shape: "roundRect", fill: "FEF3C7", stroke: "F59E0B" },
+  success: { shape: "roundRect", fill: "D1FAE5", stroke: "10B981" },
+  failure: { shape: "roundRect", fill: "FFE4E6", stroke: "F43F5E" },
 };
 
 export const FONT = "맑은 고딕";

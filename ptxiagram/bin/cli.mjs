@@ -8,11 +8,19 @@ import JSZip from "jszip";
 import { renderWorkflow } from "../renderers/workflow/render-workflow.mjs";
 import { renderArchitecture } from "../renderers/architecture/render-architecture.mjs";
 import { renderSequence } from "../renderers/sequence/render-sequence.mjs";
+import { renderDataflow } from "../renderers/dataflow/render-dataflow.mjs";
+import { renderLifecycle } from "../renderers/lifecycle/render-lifecycle.mjs";
 import { validateAll } from "../lib/validate.mjs";
 
 const execFileAsync = promisify(execFile);
 
-const RENDERERS = { workflow: renderWorkflow, architecture: renderArchitecture, sequence: renderSequence };
+const RENDERERS = {
+  workflow: renderWorkflow,
+  architecture: renderArchitecture,
+  sequence: renderSequence,
+  dataflow: renderDataflow,
+  lifecycle: renderLifecycle,
+};
 
 function usage() {
   console.log(`Usage:
@@ -21,7 +29,7 @@ function usage() {
   cli check <output.pptx>
   cli doctor
 
-Types: workflow, architecture, sequence`);
+Types: workflow, architecture, sequence, dataflow, lifecycle`);
 }
 
 async function cmdRender(type, inputPath, outputPath) {

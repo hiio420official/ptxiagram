@@ -7,9 +7,14 @@ import { repairPptx } from "../../lib/repair-pptx.mjs";
 import { validateSchema, validateWorkflowLayout } from "../../lib/validate.mjs";
 import { computeWorkflowLayout } from "../../lib/layout.mjs";
 
-export async function renderWorkflow(inputPath, outputPath) {
+// `schemaType` lets renderLifecycle (schemas/lifecycle.schema.json) reuse
+// this renderer as-is: lifecycle JSON is structurally identical to
+// workflow's (lanes/nodes/edges), it just validates against its own
+// diagram_type const and typically uses the start/active/waiting/
+// success/failure node types instead of workflow's process-step ones.
+export async function renderWorkflow(inputPath, outputPath, schemaType = "workflow") {
   const raw = JSON.parse(await fs.readFile(inputPath, "utf8"));
-  await validateSchema("workflow", raw);
+  await validateSchema(schemaType, raw);
 
   const { laneBoxes, nodeBoxes, cardsY } = computeWorkflowLayout(raw);
   const problems = validateWorkflowLayout(raw);

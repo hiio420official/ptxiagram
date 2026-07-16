@@ -70,6 +70,33 @@ export function computeSequenceLayout(raw) {
   return { participantBoxes, centerX, messageYs, lifelineBottom, cardsY };
 }
 
+export const DATAFLOW_LAYOUT = {
+  STAGE_X0: 1.7, STAGE_GAP: 2.6,
+  ROW_Y: [1.3, 2.5, 3.7, 4.9, 6.1],
+  NODE_W: 1.6, NODE_H: 0.85,
+  STAGE_LABEL_Y: 0.95,
+};
+
+// Shared by the dataflow renderer and validator so route selection can
+// never drift between what's drawn and what's checked.
+export function sameRow(a, b) {
+  return Math.abs(a.y - b.y) < 0.05;
+}
+
+export function computeDataflowLayout(raw) {
+  const L = DATAFLOW_LAYOUT;
+  const stageCenterX = raw.stages.map((_, i) => L.STAGE_X0 + i * L.STAGE_GAP);
+  const nodeBoxes = {};
+  for (const n of raw.nodes) {
+    const cx = stageCenterX[n.stage];
+    if (cx === undefined) throw new Error(`Node "${n.id}" references unknown stage index ${n.stage}`);
+    const y = L.ROW_Y[n.row];
+    if (y === undefined) throw new Error(`Node "${n.id}" references unknown row index ${n.row}`);
+    nodeBoxes[n.id] = { x: cx - L.NODE_W / 2, y, w: L.NODE_W, h: L.NODE_H };
+  }
+  return { nodeBoxes, stageCenterX };
+}
+
 const BOUNDARY_PAD = 0.3;
 
 export function computeArchitectureLayout(raw) {

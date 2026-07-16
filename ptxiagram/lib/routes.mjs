@@ -65,7 +65,10 @@ export function computeSegments(from, to, opts = {}) {
         { ...boxFromPoints({ x: midX, y: Math.min(a.y, b.y) }, { x: midX, y: Math.max(a.y, b.y) }), arrow: false },
         { ...boxFromPoints({ x: midX, y: b.y }, b), arrow: true },
       ],
-      labelAnchor: label ? { x: midX - 0.6, y: b.y, w: 1.2 } : null,
+      // anchored at the jog's own midpoint (like "drop" does), not at
+      // either endpoint's row -- otherwise this collides with a sibling
+      // "straight" edge whose label sits right at the target's row
+      labelAnchor: label ? { x: midX - 0.6, y: (a.y + b.y) / 2, w: 1.2 } : null,
     };
   }
 
