@@ -92,6 +92,15 @@ export function drawCards(slide, cards, y) {
   });
 }
 
+// Draws a participant's vertical lifeline (a sequence-diagram convention:
+// a thin dashed reference line a participant's messages attach to).
+export function drawLifeline(slide, { x, fromY, toY }) {
+  slide.addShape("line", {
+    x, y: fromY, w: 0, h: toY - fromY,
+    line: { color: "CBD5E1", width: 1, dashType: "dash" },
+  });
+}
+
 // Draws a swimlane frame with a title strip. Returns the lane's box.
 export function drawLane(slide, { x, y, w, h, label }) {
   slide.addShape("rect", {

@@ -1,7 +1,7 @@
 {
   "name": "ptxiagram",
-  "version": "0.1.0",
-  "description": "Generate native, editable PowerPoint (PPTX) architecture and workflow diagrams from a small JSON file — real shapes and connectors, not an embedded image. Ships with a Claude Skill (SKILL.md) and a CLI.",
+  "version": "0.2.0",
+  "description": "Generate native, editable PowerPoint (PPTX) architecture, workflow, and sequence diagrams from a small JSON file — real shapes and connectors, not an embedded image. Ships with a Claude Skill (SKILL.md) and a CLI.",
   "type": "module",
   "main": "index.mjs",
   "bin": {
@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "doctor": "node bin/cli.mjs doctor",
-    "test": "node test/render-workflow.test.mjs && node test/render-architecture.test.mjs && node test/validate.test.mjs && node test/workflow-lib-smoke.test.mjs"
+    "test": "node test/render-workflow.test.mjs && node test/render-architecture.test.mjs && node test/render-sequence.test.mjs && node test/validate.test.mjs && node test/workflow-lib-smoke.test.mjs"
   },
   "keywords": [
     "pptx",
@@ -27,6 +27,7 @@
     "claude-skill",
     "architecture-diagram",
     "workflow-diagram",
+    "sequence-diagram",
     "hancom",
     "hanshow",
     "office-automation"

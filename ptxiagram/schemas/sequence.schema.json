@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://claude-skills/pptx-diagram/schemas/sequence.schema.json",
+  "title": "Native PPTX Sequence Diagram",
+  "description": "Participants sit in a row (max 6, auto-spaced) with a vertical lifeline; messages are drawn in JSON order at auto-incrementing y positions. See renderers/sequence for the layout budget.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "diagram_type", "meta", "participants", "messages"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "diagram_type": { "const": "sequence" },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "subtitle": { "type": "string" },
+        "output": { "type": "string" }
+      }
+    },
+    "participants": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "label"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/id" },
+          "type": { "$ref": "common.schema.json#/$defs/nodeType" },
+          "label": { "type": "string", "minLength": 1 },
+          "sublabel": { "type": "string" }
+        }
+      }
+    },
+    "messages": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "label"],
+        "properties": {
+          "from": { "$ref": "common.schema.json#/$defs/id" },
+          "to": { "$ref": "common.schema.json#/$defs/id" },
+          "label": { "type": "string", "minLength": 1 },
+          "variant": { "enum": ["default", "emphasis", "security", "dashed"] }
+        }
+      }
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "items"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "color": { "$ref": "common.schema.json#/$defs/hexColor" },
+          "items": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

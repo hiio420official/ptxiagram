@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Ajv2020 from "ajv/dist/2020.js";
-import { computeWorkflowLayout, computeArchitectureLayout, SLIDE_W, SLIDE_H } from "./layout.mjs";
+import { computeWorkflowLayout, computeArchitectureLayout, computeSequenceLayout, SLIDE_W, SLIDE_H } from "./layout.mjs";
 import { computeSegments } from "./routes.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -133,11 +133,50 @@ export function validateArchitectureLayout(raw) {
   });
 }
 
+export function validateSequenceLayout(raw) {
+  const problems = [];
+  const { participantBoxes, messageYs, lifelineBottom } = computeSequenceLayout(raw);
+  const ids = Object.keys(participantBoxes);
+
+  for (const p of raw.participants) {
+    const box = participantBoxes[p.id];
+    const w = estimateTextWidth(p.label, 12.5);
+    if (w > box.w - 0.1) {
+      problems.push(`Participant "${p.id}" label "${p.label}" (~${w.toFixed(2)}in) is wider than its shape (${box.w.toFixed(2)}in) — shorten the label or move detail to sublabel.`);
+    }
+    if (offSlide(box)) {
+      problems.push(`Participant "${p.id}" is off-slide (slide is ${SLIDE_W}x${SLIDE_H}in).`);
+    }
+  }
+
+  for (let i = 0; i < ids.length; i++) {
+    for (let j = i + 1; j < ids.length; j++) {
+      if (rectsOverlap(participantBoxes[ids[i]], participantBoxes[ids[j]])) {
+        problems.push(`Participants "${ids[i]}" and "${ids[j]}" overlap.`);
+      }
+    }
+  }
+
+  raw.messages.forEach((m, i) => {
+    if (m.from === m.to) {
+      problems.push(`Message ${i} ("${m.label}") has the same participant "${m.from}" as from and to — self-messages aren't supported yet.`);
+    }
+    if (!participantBoxes[m.from]) problems.push(`Message ${i} references unknown participant "${m.from}".`);
+    if (!participantBoxes[m.to]) problems.push(`Message ${i} references unknown participant "${m.to}".`);
+    if (messageYs[i] > lifelineBottom - 0.3) {
+      problems.push(`Message ${i} ("${m.label}") falls below the lifeline (too many messages for the available space) — split into fewer messages or drop the cards to free up room.`);
+    }
+  });
+
+  return problems;
+}
+
 /** Runs schema validation, then layout collision checks. Returns the list
  * of layout problems (empty = clean); throws if schema validation fails. */
 export async function validateAll(type, raw) {
   await validateSchema(type, raw);
   if (type === "workflow") return validateWorkflowLayout(raw);
   if (type === "architecture") return validateArchitectureLayout(raw);
+  if (type === "sequence") return validateSequenceLayout(raw);
   throw new Error(`Unknown diagram type: ${type}`);
 }

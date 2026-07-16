@@ -1,9 +1,9 @@
 ---
 name: ptxiagram
-description: Create architecture and workflow diagrams as native, editable PowerPoint shapes (real rectangles, connectors, and text boxes a user can click and restyle in PowerPoint or Hancom 한쇼) instead of an embedded image. Accepts a plain-language description, turns it into a small JSON file, and renders it with pptxgenjs. Use when the user asks for a diagram, architecture drawing, or process flow that needs to end up inside a .pptx deck or a Korean-office-suite-compatible presentation - not when they just want a standalone image or an HTML/web diagram (use an SVG-based diagram tool for that instead).
+description: Create architecture, workflow, and sequence diagrams as native, editable PowerPoint shapes (real rectangles, connectors, and text boxes a user can click and restyle in PowerPoint or Hancom 한쇼) instead of an embedded image. Accepts a plain-language description, turns it into a small JSON file, and renders it with pptxgenjs. Use when the user asks for a diagram, architecture drawing, process flow, or API call sequence that needs to end up inside a .pptx deck or a Korean-office-suite-compatible presentation - not when they just want a standalone image or an HTML/web diagram (use an SVG-based diagram tool for that instead).
 license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
   status: prototype
   based_on: "gitbrent/PptxGenJS (MIT)"
 ---
@@ -51,6 +51,7 @@ validation and the embedded-text dump, just no rendered preview image).
 |------|---------|--------|
 | `workflow` | Cross-team processes, approval chains, anything with swimlanes and a happy path | `schemas/workflow.schema.json` |
 | `architecture` | System components, services, datastores, trust boundaries, hub-and-spoke integrations | `schemas/architecture.schema.json` |
+| `sequence` | API call chains, request/response traces, cache-fallback flows — up to 6 participants, up to 9 messages | `schemas/sequence.schema.json` |
 
 ## The loop
 
@@ -58,6 +59,7 @@ validation and the embedded-text dump, just no rendered preview image).
    shape, don't guess the field names:
    - `examples/onboarding.workflow.json`
    - `examples/order-processing.architecture.json`
+   - `examples/cache-miss.sequence.json`
 2. Write `<name>.<type>.json`.
 3. Render:
    ```bash
@@ -127,6 +129,30 @@ order. Default node size is 1.8×0.95in.
 `boundaries[].wraps` takes component ids, not coordinates — the renderer
 computes a padded frame around them, so never hand-compute a boundary box.
 
+## Sequence JSON shape
+
+```json
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": { "title": "...", "output": "out.pptx" },
+  "participants": [
+    { "id": "api", "type": "backend", "label": "API", "sublabel": "handler" }
+  ],
+  "messages": [
+    { "from": "client", "to": "api", "label": "GET /orders/123", "variant": "emphasis" }
+  ],
+  "cards": []
+}
+```
+
+**Layout budget**: up to 6 participants in a row (auto-spaced, 2.2in apart),
+each with a vertical dashed lifeline. Messages are drawn in JSON array order
+at auto-incrementing y positions (0.55in apart) — order matters, there's no
+explicit `y` field. Up to 9 messages without `cards`, ~6 with (cards need
+room at the bottom, so the lifeline gets shorter). Self-messages (same
+`from`/`to`) aren't supported yet.
+
 ## Node types
 
 `client` `frontend` `neutral` `backend` `database` `cache` `queue`
@@ -169,7 +195,8 @@ this automatically; `check` verifies it actually happened. Source:
 
 ## What's not built yet
 
-- `sequence`, `dataflow`, `lifecycle` diagram types (only `workflow` and
-  `architecture` exist so far)
+- `dataflow`, `lifecycle` diagram types (`workflow`, `architecture`, and
+  `sequence` exist so far)
 - No CJK exact-metrics font measurement — the label-width check is a
   conservative estimate, not real glyph widths
+- Sequence self-messages (a participant messaging itself)

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "캐시 미스 요청 흐름",
+    "subtitle": "Client → API → Cache → DB",
+    "output": "test/output/cache-miss.schema-driven.pptx"
+  },
+  "participants": [
+    { "id": "client", "type": "client", "label": "Client", "sublabel": "브라우저" },
+    { "id": "api", "type": "backend", "label": "API", "sublabel": "handler" },
+    { "id": "cache", "type": "cache", "label": "Cache", "sublabel": "Redis" },
+    { "id": "db", "type": "database", "label": "DB", "sublabel": "PostgreSQL" }
+  ],
+  "messages": [
+    { "from": "client", "to": "api", "label": "GET /orders/123", "variant": "emphasis" },
+    { "from": "api", "to": "cache", "label": "조회", "variant": "default" },
+    { "from": "cache", "to": "api", "label": "캐시 미스", "variant": "dashed" },
+    { "from": "api", "to": "db", "label": "쿼리 실행", "variant": "emphasis" },
+    { "from": "db", "to": "api", "label": "결과 반환", "variant": "dashed" },
+    { "from": "api", "to": "client", "label": "200 OK", "variant": "emphasis" }
+  ]
+}

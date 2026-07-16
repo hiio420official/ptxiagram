@@ -110,3 +110,19 @@ export function connector(slide, from, to, opts = {}) {
     });
   }
 }
+
+/** Draws a single point-to-point arrow at an explicit y (sequence
+ * messages, self-loops) instead of anchoring to node box sides. Direction
+ * matters: the arrowhead lands at (x2,y). opts: { color, dashed, label } */
+export function drawArrow(slide, { x1, x2, y, color = "94A3B8", dashed = false, label }) {
+  slide.addShape("line", {
+    x: Math.min(x1, x2), y, w: Math.abs(x2 - x1), h: 0,
+    line: { color, width: 2, dashType: dashed ? "dash" : "solid", endArrowType: "triangle" },
+  });
+  if (label) {
+    slide.addText(label, {
+      x: Math.min(x1, x2), y: y - 0.26, w: Math.abs(x2 - x1), h: 0.24,
+      align: "center", fontFace: FONT, fontSize: 8.5, color: "475569",
+    });
+  }
+}

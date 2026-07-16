@@ -47,6 +47,29 @@ export function computeWorkflowLayout(raw) {
   return { laneBoxes, nodeBoxes, nodeMeta, cardsY };
 }
 
+export const SEQUENCE_LAYOUT = {
+  X0: 0.7, GAP: 2.2, BOX_W: 1.5, BOX_H: 0.7,
+  TOP_Y: 1.1, LIFELINE_BOTTOM: 7.0,
+  MSG_START_Y: 2.3, MSG_STEP: 0.55,
+};
+
+export function computeSequenceLayout(raw) {
+  const L = SEQUENCE_LAYOUT;
+  const participantBoxes = {};
+  const centerX = {};
+  raw.participants.forEach((p, i) => {
+    const x = L.X0 + i * L.GAP;
+    participantBoxes[p.id] = { x, y: L.TOP_Y, w: L.BOX_W, h: L.BOX_H };
+    centerX[p.id] = x + L.BOX_W / 2;
+  });
+  const messageYs = raw.messages.map((_, i) => L.MSG_START_Y + i * L.MSG_STEP);
+  // cards need ~1.75in of vertical room, so diagrams that use them get a
+  // shorter lifeline (fewer messages fit) instead of overflowing the slide
+  const lifelineBottom = raw.cards && raw.cards.length ? 5.3 : L.LIFELINE_BOTTOM;
+  const cardsY = lifelineBottom + 0.15;
+  return { participantBoxes, centerX, messageYs, lifelineBottom, cardsY };
+}
+
 const BOUNDARY_PAD = 0.3;
 
 export function computeArchitectureLayout(raw) {
