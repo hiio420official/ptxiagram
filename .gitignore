@@ -2,3 +2,5 @@ node_modules/
 *.log
 prototype/output/
 ptxiagram/test/output/
+.env
+.npmrc
