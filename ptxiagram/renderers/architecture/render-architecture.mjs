@@ -1,5 +1,6 @@
 import pptxgen from "pptxgenjs";
 import fs from "node:fs/promises";
+import path from "node:path";
 import { drawNode, drawBoundary, drawCards, FONT, EDGE_VARIANTS } from "../../lib/shapes.mjs";
 import { connector } from "../../lib/routes.mjs";
 import { repairPptx } from "../../lib/repair-pptx.mjs";
@@ -62,6 +63,7 @@ export async function renderArchitecture(inputPath, outputPath) {
   });
 
   const outFile = outputPath || raw.meta.output || "output.pptx";
+  await fs.mkdir(path.dirname(outFile), { recursive: true });
   await pptx.writeFile({ fileName: outFile });
   await repairPptx(outFile);
   return outFile;
