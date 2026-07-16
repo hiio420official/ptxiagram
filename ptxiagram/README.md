@@ -7,7 +7,7 @@
 ptxiagram is an agent skill for Claude (and a standalone CLI/library) that turns a plain-English description of a system or process into a `.pptx` slide built from real PowerPoint shapes: rectangles, cylinders, clouds, connectors, text boxes. Anyone can open the result in PowerPoint — or Hancom 한쇼 — and click a box to change its color, text, or position, because it *is* a box, not a picture of one.
 
 - **Native shapes, not a picture** — every box and arrow is a real PPTX shape, editable after generation
-- **Two diagram types today** — `workflow` (swimlanes, happy-path flows) and `architecture` (free-placed components, trust boundaries, hub-and-spoke)
+- **Three diagram types today** — `workflow` (swimlanes, happy-path flows), `architecture` (free-placed components, trust boundaries, hub-and-spoke), and `sequence` (participants + lifelines, API call chains)
 - **A validator that catches real layout bugs before rendering** — node overlap, labels wider than their shape, and connectors that cut through an unrelated node all fail loudly with a specific fix, instead of shipping a broken-looking slide
 - **Ships a Hancom Office compatibility fix** — every generated file is post-processed to strip a documented PptxGenJS defect that PowerPoint silently repairs but Hancom's 한쇼 flags as a corrupted document (see below)
 - **Route presets instead of hand-computed coordinates** — `straight`, `drop`, `elbow-right`, `arc-over-top` cover swimlane transitions, hub-and-spoke fan-out, and routing around a boundary box
